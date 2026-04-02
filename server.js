@@ -19,9 +19,11 @@ async function createServer() {
     app.use(vite.middlewares)
   } else {
     app.use((await import('compression')).default())
-    app.use((await import('sirv')).default(path.resolve(__dirname, 'dist/client'), {
-      extensions: []
+    app.use('/assets', (await import('sirv')).default(path.resolve(__dirname, 'dist/client/assets'), {
+      immutable: true,
+      maxAge: 31536000
     }))
+    app.use(express.static(path.resolve(__dirname, 'dist/client')))
   }
 
   app.use('*', async (req, res) => {
@@ -58,8 +60,9 @@ async function createServer() {
   return { app }
 }
 
+const port = process.env.PORT || 3000
 createServer().then(({ app }) =>
-  app.listen(3000, () => {
-    console.log('http://localhost:3000')
+  app.listen(port, () => {
+    console.log(`Server started at http://localhost:${port}`)
   })
 )
